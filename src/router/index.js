@@ -301,6 +301,42 @@ export const constantRouterMap = [
       }
     ]
   },
+  {
+    path:'/user',
+    component: Layout,
+    redirect: '/user/index',
+    name: 'user',
+    meta: {title: '用户', icon: 'user'},
+    children: [
+      {
+        path: 'index',
+        name: 'index',
+        component: () => import('@/views/user/index'),
+        meta: {title: '用户列表', icon: 'sms-flash'}
+      },
+      {
+        path: 'flashSession',
+        name: 'flashSession',
+        component: () => import('@/views/sms/flash/sessionList'),
+        meta: {title: '秒杀时间段列表'},
+        hidden:true
+      },
+      {
+        path: 'selectSession',
+        name: 'selectSession',
+        component: () => import('@/views/sms/flash/selectSessionList'),
+        meta: {title: '秒杀时间段选择'},
+        hidden:true
+      },
+      {
+        path: 'flashProductRelation',
+        name: 'flashProductRelation',
+        component: () => import('@/views/sms/flash/productRelationList'),
+        meta: {title: '秒杀商品列表'},
+        hidden:true
+      }
+    ]
+  },
   {path: '*', redirect: '/404', hidden: true}
 ]
 
