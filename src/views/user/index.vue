@@ -1,78 +1,75 @@
 <template> 
   <div class="app-container">
     <el-card class="filter-container" shadow="never">
-      <div>
-        <i class="el-icon-search"></i>
-        <span>筛选搜索</span>
-        <el-button
-          style="float:right"
-          type="primary"
-          @click="handleSearchList()"
-          size="small">
-          查询搜索
-        </el-button>
-        <el-button
-          style="float:right;margin-right: 15px"
-          @click="handleResetSearch()"
-          size="small">
-          重置
-        </el-button>
-      </div>
-      <div style="margin-top: 15px">
-        <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
-          <el-form-item label="搜索名称：">
-            <el-input v-model.trim="listQuery.keyword" placeholder="员工/名称" auto-complete="off" size="small" class="control" maxlength="20"/>
-          </el-form-item>
-           <!--工号/姓名-->
-        </el-form>
-      </div>
+        <div>
+          <i class="el-icon-search"></i>
+          <span>筛选搜索</span>
+          <el-button
+            style="float: right"
+            @click="searchMemberList()"
+            type="primary"
+            size="small">
+            查询  
+          </el-button>
+        </div>
+        <div style="margin-top: 15px">
+          <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
+            <el-form-item label="输入搜索：">
+              <el-input style="width: 203px" v-model="listQuery.keyword" placeholder="会员名称/关键字"></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
     </el-card>
     <el-card class="operate-container" shadow="never">
       <i class="el-icon-tickets"></i>
       <span>数据列表</span>
-      <el-button size="mini" class="btn-add" @click="handleAdd()" style="margin-left: 20px">新建</el-button>
+      <el-button
+        class="btn-add"
+        @click="createMember()"
+        size="mini">
+        添加
+      </el-button>
     </el-card>
     <div class="table-container">
-      <el-table ref="flashTable"
+      <el-table ref="brandTable"
                 :data="list"
-                style="width: 100%;"
-                v-loading="listLoading" border>
+                style="width: 100%"
+                @selection-change="handleSelectionChange"
+                v-loading="listLoading"
+                border>
         <el-table-column type="selection" width="60" align="center"></el-table-column>
         <el-table-column label="编号" width="100" align="center">
           <template slot-scope="scope">{{scope.row.id}}</template>
         </el-table-column>
-        <el-table-column label="用户名" width="150" align="center">
-          <template slot-scope="scope">{{scope.row.title}}</template>
+        <el-table-column label="姓名" align="center">
+          <template slot-scope="scope">{{scope.row.username}}</template>
         </el-table-column>
-        <el-table-column label="姓名" width="150" align="center">
-          <template slot-scope="scope">{{scope.row |formatActiveStatus}}</template>
+        <el-table-column label="手机号" align="center">
+          <template slot-scope="scope">{{scope.row.phone}}</template>
         </el-table-column>
-        <el-table-column label="手机号" width="170" align="center">
-          <template slot-scope="scope">{{scope.row.endDate | formatDate}}</template>
+        <el-table-column label="性别" align="center">
+          <template slot-scope="scope">{{scope.row.gender}}</template>
         </el-table-column>
-         <el-table-column label="用户名" width="200" align="center">
-          <template slot-scope="scope">{{scope.row.title}}</template>
-        </el-table-column>
-        <el-table-column label="上线/下线" width="200" align="center">
+        <el-table-column label="启用\禁用" width="100" align="center">
           <template slot-scope="scope">
             <el-switch
-              @change="handleStatusChange(scope.$index, scope.row)"
+              @change="handleShowStatusChange(scope.$index, scope.row)"
               :active-value="1"
               :inactive-value="0"
               v-model="scope.row.status">
             </el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="200" align="center">
           <template slot-scope="scope">
-            <el-button size="mini"
-                       type="text"
-                       @click="handleUpdate(scope.$index, scope.row)">
-              编辑
+            <el-button
+              size="mini"
+              @click="handleUpdate(scope.$index, scope.row)">编辑
             </el-button>
-            <el-button size="mini"
-                       type="text"
-                       @click="handleDelete(scope.$index, scope.row)">删除
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.$index, scope.row)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -84,162 +81,251 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         layout="total, sizes,prev, pager, next,jumper"
-        :current-page.sync="listQuery.pageNum"
         :page-size="listQuery.pageSize"
         :page-sizes="[5,10,15]"
+        :current-page.sync="listQuery.pageNum"
         :total="total">
       </el-pagination>
     </div>
-    <el-dialog
-      :visible.sync="dialogVisible"
-      :title="title"
-      width="750px"
-      center
-      @close="close">
-      <el-row :gutter="10">
-        <el-form ref="flashPromotionForm" :model="flashPromotion" :rules="nodeRules" label-width="120px">
-          <el-col :span="24">
-            <el-col :span="12">
-              <!-- 姓名 -->
-              <el-form-item label="姓名" prop="order">
-                <el-input v-model.trim="nodeForm.order" maxlength="2" auto-complete="off" size="small" @keyup.native="proving"/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <!-- 手机号 -->
-              <el-form-item label="手机号" prop="code">
-                <el-input v-model.trim="flashPromotion.total" :disabled="isEdit" maxlength="30" auto-complete="off" size="small"/>
-              </el-form-item>
-            </el-col>
-          </el-col>
-          <el-col :span="24">
-            <el-col :span="12">
-              <!-- 节点编码 -->
-              <el-form-item label="测试" prop="code">
-                <el-input v-model.trim="nodeForm.code" :disabled="isEdit" maxlength="30" auto-complete="off" size="small"/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <!-- 节点名称 -->
-              <el-form-item label="测试" prop="name">
-                <el-input v-model.trim="nodeForm.name" maxlength="20" auto-complete="off" size="small"/>
-              </el-form-item>
-            </el-col>
-          </el-col>
-          <el-col :span="24">
-            <el-col :span="12">
-              <!-- 工作类型 -->
-              <el-form-item label="测试" prop="type">
-                <el-select :disabled="flag === 1" v-model="nodeForm.type" size="small" @change="typeChange">
-                  <el-option
-                    v-for="(item, key) in workTypeList"
-                    :key="key"
-                    :label="item.name"
-                    :value="item.value"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item ref="formKey" :class="{'is-required':!nodeForm.isSystemAutoExec}" label="测试" prop="formKey">
-                <el-select v-model="nodeForm.formKey" size="small">
-                  <el-option
-                    v-for="(item, key) in pageList.options"
-                    :key="key"
-                    :label="item.name"
-                    :value="key"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-col>
-          <el-col :span="12">
-            <el-col :span="24">
-              <!-- 操作完成状态 -->
-              <el-form-item label="测试" prop="operateSuccessStatus">
-                <el-select v-model="nodeForm.operateSuccessStatus" :placeholder="holderSuccess" size="small">
-                  <el-option
-                    v-for="(value, key) in completedStateList.options"
-                    :key="key"
-                    :label="value.name"
-                    :value="key"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item label="上线/下线">
-                <el-radio-group v-model="flashPromotion."
-              </el-form-item>
-            </el-col>
-          </el-col>
-          <el-col :span="12" class="rightFormItem">
-            
-          </el-col>
-        </el-form>
-      </el-row>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="close">{{ $t('workFlow.cancel') }}</el-button>
-        <el-button v-loading.fullscreen.lock="fullscreenLoading" type="primary" @click="save">{{ $t('workFlow.save') }}</el-button>
-      </span>
+    <!-- 新建、编辑会员弹窗 -->
+    <el-dialog :visible.sync="dialogVisible" :title="dialogTitle" :before-close="closeDialog" center>
+      <el-form ref="memberForm" :model="memberForm" :rules="memberRules" label-position="left" label-width="150px">
+        <!-- 用户名 -->
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="memberForm.username" laceholder="请输入用户名" size="small" auto-complete="off" maxlength="20"/>
+        </el-form-item>
+        <!-- 昵称 -->
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="memberForm.nickname" placeholder="请输入昵称" size="small" auto-complete="off" maxlength="20"/>
+        </el-form-item>
+        <!-- 手机号 -->
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model.number="memberForm.phone" onkeypress="return event.keyCode>=48&&event.keyCode<=57" placeholder="请输入手机号" size="small" auto-complete="off" minlength="11" maxlength="11"/>
+        </el-form-item>
+        <!-- 帐号启用状态 -->
+        <el-form-item label="帐号启用状态" prop="status">
+          <el-radio-group v-model="memberForm.status">
+            <el-radio :label="1">是</el-radio>
+            <el-radio :label="0">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <!-- 性别 -->
+        <el-form-item label="性别" prop="gender">
+          <el-radio-group v-model="memberForm.gender">
+            <el-radio :label="1">男</el-radio>
+            <el-radio :label="0">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <!-- 生日 -->
+        <el-form-item label="生日" prop="gender">
+          <el-date-picker
+            v-model="memberForm.birthday"
+            type="date"
+            placeholder="选择日期">
+          </el-date-picker>
+        </el-form-item>
+        <!-- 所住城市 -->
+        <el-form-item label="所住城市" prop="city">
+          <el-input v-model="memberForm.city" placeholder="请输入所住城市" size="small" auto-complete="off" maxlength="20"/>
+        </el-form-item>
+        <!-- 职业 -->
+        <el-form-item label="职业" prop="job">
+          <el-input v-model="memberForm.job" placeholder="请输入职业" size="small" auto-complete="off" maxlength="20"/>
+        </el-form-item>
+      </el-form>
+      <!-- 提交工艺系统表单 -->
+      <div slot="footer">
+        <!-- 取消按钮 -->
+        <el-button @click="closeDialog">取消</el-button>
+        <!-- 保存按钮 -->
+        <el-button type="primary" @click="submitForm('memberForm')">保存</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 <script>
-  import {fetchList, updateStatus, deleteFlash, createFlash, updateFlash} from '@/api/flash';
-  import {formatDate} from '@/utils/date';
+  import {fetchList,updateStatus,updateMember,fetchPartList,deleteMember} from '@/api/member'
 
-  const defaultListQuery = {
-    pageNum: 1,
-    pageSize: 5,
-    keyword: null
-  };
-  const defaultFlashPromotion = {
-    id: null,
-    title: null,
-    startDate: null,
-    endDate: null,
-    status: 0
-  };
   export default {
-    name: 'flashPromotionList',
+    name: 'brandList',
     data() {
       return {
-        listQuery: Object.assign({}, defaultListQuery),
+        operates: [
+          {
+            label: "显示品牌",
+            value: "showBrand"
+          },
+          {
+            label: "隐藏品牌",
+            value: "hideBrand"
+          }
+        ],
+        operateType: null,
+        listQuery: {
+          keyword: null,
+          pageNum: 1,
+          pageSize: 10
+        },
         list: null,
         total: null,
-        listLoading: false,
+        listLoading: true,
+        multipleSelection: [],
+        // 弹窗参数
+        // 标题
+        dialogTitle: '',
+        // 弹窗 显示和隐藏的标识
         dialogVisible: false,
-        flashPromotion: Object.assign({}, defaultFlashPromotion),
-        isEdit: false
+        memberForm: {
+          username:'',
+          nickname:'',
+          phone:'',
+          status:1,
+          gender:0,
+          birthday:new Date(),
+          city:'',
+          job:''
+        },
+        // 新建和编辑的标识
+        isCreate: false,
+        memberRules: {
+          username: [
+            { required: true, message: '请输入用户名', trigger: 'blur' },
+            { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'change' }
+          ],
+          nickname: [
+            { required: true, message: '请输入昵称', trigger: 'change' }
+          ],
+          phone: [
+            { required: true, message: '请输入手机号', trigger: 'change' }
+          ],
+          status: [
+            { required: true, message: '请选择启用状态', trigger: 'change' }
+          ],
+          gender: [
+            { required: true, message: '请选择性别', trigger: 'change' }
+          ],
+          birthday: [
+            { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
+          ],
+          city: [
+            { required: true, message: '请填写所住城市', trigger: 'change' }
+          ],
+          job: [
+            { required: true, message: '请填写职业', trigger: 'change' }
+          ]
+        }
       }
     },
     created() {
       this.getList();
     },
-    filters: {
-      formatActiveStatus(row) {
-        let nowTime = new Date().getTime();
-        if (nowTime >= row.startDate && nowTime <= row.endDate) {
-          return '活动进行中';
-        } else if (nowTime > row.endDate) {
-          return '活动已结束';
-        } else {
-          return '活动未开始';
-        }
-      },
-      formatDate(time) {
-        if (time == null || time === '') {
-          return 'N/A';
-        }
-        let date = new Date(time);
-        return formatDate(date, 'yyyy-MM-dd')
-      }
-    },
     methods: {
-      handleResetSearch() {
-        this.listQuery = Object.assign({}, defaultListQuery);
+      getList() {
+        this.listLoading = true;
+        fetchList(this.listQuery).then(response => {
+           this.listLoading = false;
+          this.list = response.data.list;
+          this.total = response.data.total;
+          this.totalPage = response.data.totalPage;
+          this.pageSize = response.data.pageSize;
+        });
       },
-      handleSearchList() {
-        this.listQuery.pageNum = 1;
-        this.getList();
+      getPartList() {
+        this.listLoading = true;
+        fetchList(this.listQuery).then(response => {
+           this.listLoading = false;
+          this.list = response.data.list;
+          this.total = response.data.total;
+          this.totalPage = response.data.totalPage;
+          this.pageSize = response.data.pageSize;
+        });
+      },
+
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      handleUpdate(index, row) {
+        const vm = this;
+        vm.isCreate = false;
+        vm.dialogTitle = "编辑员工"
+        vm.memberForm = Object.assign({},row)
+        vm.dialogVisible = true;
+      },
+      // 取消弹窗
+      closeDialog(){
+        const vm = this;
+        vm.$refs.memberForm.resetFields();
+        vm.dialogVisible = false;
+        vm.getList();
+      },
+      // 保存、
+      submitForm() {
+        // 新建/编辑
+        const vm = this;
+        vm.$refs.memberForm.validate(valid => {
+          if (valid) {
+            const data = vm.memberForm
+            const flag = vm.isCreate;
+            // 判断新建还是编辑
+            updateMember(flag,data).then(response => {
+              if(response.code==200){
+                vm.$message({
+                  message: flag?'新建员工成功':'编辑员工成功',
+                  type: 'success',
+                  showClose: true,
+                  duration: 3 * 1000
+                });
+                vm.closeDialog();
+              }
+            }).catch(()=>{
+              vm.$message({
+                message: flag?'新建员工失败':'编辑员工失败',
+                type: 'error',
+                showClose: true,
+                duration: 3 * 1000
+              });
+            });
+          } else {
+            return false;
+          }
+        });
+      },
+      handleDelete(index, row) {
+        this.$confirm('是否要删除该会员', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deleteMember(row.id).then(response => {
+            this.$message({
+              message: '删除成功',
+              type: 'success',
+              duration: 1000
+            });
+            this.getList();
+          });
+        });
+      },
+    
+    
+      handleShowStatusChange(index, row) {
+        let data = new URLSearchParams();
+        ;
+        data.append("id", row.id);
+        data.append("status", row.status);
+        updateStatus(data).then(response => {
+          this.$message({
+            message: '修改成功',
+            type: 'success',
+            duration: 1000
+          });
+        }).catch(error => {
+          if (row.status === 0) {
+            row.status = 1;
+          } else {
+            row.status = 0;
+          }
+        });
       },
       handleSizeChange(val) {
         this.listQuery.pageNum = 1;
@@ -250,96 +336,30 @@
         this.listQuery.pageNum = val;
         this.getList();
       },
-      handleAdd() {
-        this.dialogVisible = true;
-        this.isEdit = false;
-        this.flashPromotion = Object.assign({},defaultFlashPromotion);
+      searchMemberList() {
+        this.listQuery.pageNum = 1;
+        this.getPartList();
       },
-      handleShowSessionList() {
-        this.$router.push({path: '/sms/flashSession'})
-      },
-      handleStatusChange(index, row) {
-        this.$confirm('是否要修改该状态?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          updateStatus(row.id, {status: row.status}).then(response => {
-            this.$message({
-              type: 'success',
-              message: '修改成功!'
-            });
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消修改'
-          });
-          this.getList();
-        });
-      },
-      handleDelete(index, row) {
-        this.$confirm('是否要删除该活动?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          deleteFlash(row.id).then(response => {
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            });
-            this.getList();
-          });
-        });
-      },
-      handleUpdate(index, row) {
-        this.dialogVisible = true;
-        this.isEdit = true;
-        this.flashPromotion = Object.assign({},row);
-      },
-      handleDialogConfirm() {
-        this.$confirm('是否要确认?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          if (this.isEdit) {
-            updateFlash(this.flashPromotion.id,this.flashPromotion).then(response => {
-              this.$message({
-                message: '修改成功！',
-                type: 'success'
-              });
-              this.dialogVisible =false;
-              this.getList();
-            })
-          } else {
-            createFlash(this.flashPromotion).then(response => {
-              this.$message({
-                message: '添加成功！',
-                type: 'success'
-              });
-              this.dialogVisible =false;
-              this.getList();
-            })
-          }
-        })
-      },
-      handleSelectSession(index,row){
-        this.$router.push({path:'/sms/selectSession',query:{flashPromotionId:row.id}})
-      },
-      getList() {
-        this.listLoading = true;
-        fetchList(this.listQuery).then(response => {
-          this.listLoading = false;
-          this.list = response.data.list;
-          this.total = response.data.total;
-        });
+      createMember() {
+        const vm = this;
+        vm.isCreate = true;
+        vm.dialogTitle = "新建员工"
+        vm.memberForm={
+          username:'',
+          nickname:'',
+          phone:'',
+          status:1,
+          gender:0,
+          birthday:new Date(),
+          city:'',
+          job:''
+        }
+        vm.dialogVisible = true;
       }
     }
   }
 </script>
-<style>
+<style rel="stylesheet/scss" lang="scss" scoped>
 
 
 </style>
