@@ -43,6 +43,7 @@
           signature: '',
           key: '',
           ossaccessKeyId: '',
+          success_action_status:'',
           dir: '',
           host: ''
         }
@@ -97,6 +98,7 @@
             _self.dataObj.key = response.data.dir + '/${filename}';
             _self.dataObj.dir = response.data.dir;
             _self.dataObj.host = response.data.host;
+            _self.dataObj.success_action_status = response.data.success_action_status;
             _self.listObj[fileName] = {hasSuccess: false, uid: file.uid, width: this.width, height: this.height};
             resolve(true)
           }).catch(err => {
