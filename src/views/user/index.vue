@@ -89,7 +89,7 @@
     </div>
     <!-- 新建、编辑会员弹窗 -->
     <el-dialog :visible.sync="dialogVisible" :title="dialogTitle" :before-close="closeDialog" center>
-      <el-form ref="memberForm" :model="memberForm" :rules="memberRules" label-position="left" label-width="150px">
+      <el-form ref="memberForm" :model="memberForm" :rules="memberRules" label-position="left" label-width="100px">
         <!-- 用户名 -->
         <el-form-item label="用户名" prop="username">
           <el-input v-model="memberForm.username" laceholder="请输入用户名" size="small" auto-complete="off" maxlength="20"/>
