@@ -41,14 +41,17 @@
         <el-table-column label="编号" width="100" align="center">
           <template slot-scope="scope">{{scope.row.id}}</template>
         </el-table-column>
-        <el-table-column label="姓名" align="center">
+        <el-table-column label="用户名" align="center">
           <template slot-scope="scope">{{scope.row.username}}</template>
+        </el-table-column>
+         <el-table-column label="昵称" align="center">
+          <template slot-scope="scope">{{scope.row.nickname}}</template>
         </el-table-column>
         <el-table-column label="手机号" align="center">
           <template slot-scope="scope">{{scope.row.phone}}</template>
         </el-table-column>
-        <el-table-column label="性别" align="center">
-          <template slot-scope="scope">{{scope.row.gender}}</template>
+        <el-table-column label="职业" align="center">
+          <template slot-scope="scope">{{scope.row.job}}</template>
         </el-table-column>
         <el-table-column label="启用\禁用" width="100" align="center">
           <template slot-scope="scope">
@@ -338,7 +341,7 @@
       },
       searchMemberList() {
         this.listQuery.pageNum = 1;
-        this.getPartList();
+        this.getList();
       },
       createMember() {
         const vm = this;

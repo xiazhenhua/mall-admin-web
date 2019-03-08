@@ -31,7 +31,7 @@ export function updateStatus(data) {
 export function deleteMember(id) {
   return request({
     url:'/user/update/delete/'+id,
-    method:'get',
+    method:'post',
   })
 }
 
