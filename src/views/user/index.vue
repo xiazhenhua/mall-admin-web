@@ -250,7 +250,7 @@
       handleUpdate(index, row) {
         const vm = this;
         vm.isCreate = false;
-        vm.dialogTitle = "编辑员工"
+        vm.dialogTitle = "编辑会员"
         vm.memberForm = Object.assign({},row)
         vm.dialogVisible = true;
       },
@@ -273,7 +273,7 @@
             updateMember(flag,data).then(response => {
               if(response.code==200){
                 vm.$message({
-                  message: flag?'新建员工成功':'编辑员工成功',
+                  message: flag?'新建会员成功':'编辑会员成功',
                   type: 'success',
                   showClose: true,
                   duration: 3 * 1000
@@ -282,7 +282,7 @@
               }
             }).catch(()=>{
               vm.$message({
-                message: flag?'新建员工失败':'编辑员工失败',
+                message: flag?'新建会员失败':'编辑会员失败',
                 type: 'error',
                 showClose: true,
                 duration: 3 * 1000
@@ -346,7 +346,7 @@
       createMember() {
         const vm = this;
         vm.isCreate = true;
-        vm.dialogTitle = "新建员工"
+        vm.dialogTitle = "新建会员"
         vm.memberForm={
           username:'',
           nickname:'',
